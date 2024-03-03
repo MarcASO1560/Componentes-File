@@ -4,6 +4,8 @@ package cesur.accesodatos.file;
  * Represents an employee in the system.
  * This class encapsulates information about an employee, including their unique identifier,
  * name, job position, and department number.
+ *
+ * @author Marc Albert Seguí Olmos
  */
 public class Employee {
 
