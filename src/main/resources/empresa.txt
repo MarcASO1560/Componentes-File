@@ -1,0 +1,4 @@
+department(10,Contabilidad,Madrid)
+department(20,Marketing,Barcelona)
+department(30,Ventas,Alicante)
+department(40,Logística,Valencia)
