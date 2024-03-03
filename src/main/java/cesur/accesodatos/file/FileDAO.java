@@ -240,45 +240,50 @@ public class FileDAO implements IDAO, Menu, FileHandlerInterface{
     @Override
     public Employee deleteEmployee(Object id) {
         if (!(id instanceof Integer)) {
-            System.out.println("ID no válido");
+            System.out.println("Invalid ID");
             return null;
         }
 
         int empId = (Integer) id;
-        List<Employee> employees = findAllEmployees();
+        List<String> lines = new ArrayList<>();
         Employee employeeToRemove = null;
+        boolean found = false;
 
-        // Find the employee to delete
-        for (Employee emp : employees) {
-            if (emp.getEmpno() == empId) {
-                employeeToRemove = emp;
-                break;
-            }
-        }
-
-        if (employeeToRemove == null) {
-            System.out.println("Empleado no encontrado.");
-            return null;
-        }
-
-        // Remove the employee from the list
-        employees.remove(employeeToRemove);
-
-        // Overwrite the file with the updated list
-        try (PrintWriter out = new PrintWriter(new FileWriter(path))) {
-            for (Employee emp : employees) {
-                String employeeData = String.format("employee(%d,%s,%s,%d)",
-                        emp.getEmpno(),
-                        emp.getName(),
-                        emp.getPosition(),
-                        emp.getDepno());
-                out.println(employeeData);
+        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("employee(")) {
+                    String[] parts = line.substring(line.indexOf("(") + 1, line.indexOf(")")).split(",");
+                    int employeeId = Integer.parseInt(parts[0]);
+                    if (employeeId == empId) {
+                        employeeToRemove = new Employee(employeeId, parts[1], parts[2], Integer.parseInt(parts[3]));
+                        found = true; // Mark that the employee was found and is to be removed
+                        continue; // Skip adding this line to 'lines'
+                    }
+                }
+                lines.add(line); // Add the line to be kept
             }
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
-        System.out.println("Se ha eliminado el empleado.");
+
+        if (!found) {
+            System.out.println("Employee not found.");
+            return null;
+        }
+
+        // Write everything back, except the removed employee
+        try (PrintWriter out = new PrintWriter(new FileWriter(path))) {
+            for (String line : lines) {
+                out.println(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        System.out.println("Employee has been deleted.");
         return employeeToRemove;
     }
 
@@ -433,51 +438,54 @@ public class FileDAO implements IDAO, Menu, FileHandlerInterface{
      */
     @Override
     public Department deleteDepartment(Object id) {
-        // Validate the ID is an instance of Integer, return null if not
+        // Validate if the provided ID is an Integer, if not, return null
         if (!(id instanceof Integer)) {
             System.out.println("The provided ID is not valid.");
             return null;
         }
 
         int deptId = (Integer) id;
-        // Fetch the list of all departments
-        List<Department> departments = findAllDepartments();
+        List<String> lines = new ArrayList<>();
         Department departmentToRemove = null;
+        boolean found = false;
 
-        // Loop through the list to find the department with the given ID
-        for (Department dept : departments) {
-            if (dept.getDepno() == deptId) {
-                departmentToRemove = dept;
-                break; // Department found, break the loop
-            }
-        }
-
-        // If no department is found, print a message and return null
-        if (departmentToRemove == null) {
-            System.out.println("Department not found.");
-            return null;
-        }
-
-        // Remove the found department from the list
-        departments.remove(departmentToRemove);
-
-        // Try to overwrite the file with the updated list of departments
-        try (PrintWriter out = new PrintWriter(new FileWriter(path))) {
-            for (Department dept : departments) {
-                // Format each department's data and write it to the file
-                String departmentData = String.format("department(%d,%s,%s)",
-                        dept.getDepno(),
-                        dept.getName(),
-                        dept.getLocation());
-                out.println(departmentData);
+        try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                // Identify department lines and check if it matches the department to delete
+                if (line.startsWith("department(")) {
+                    String[] parts = line.substring(line.indexOf("(") + 1, line.indexOf(")")).split(",");
+                    int departmentId = Integer.parseInt(parts[0]);
+                    if (departmentId == deptId) {
+                        // Construct the department object to return and mark as found
+                        departmentToRemove = new Department(departmentId, parts[1], parts[2]);
+                        found = true; // This line should be skipped and not added back
+                        continue; // Skip this iteration, effectively not adding the department to be deleted
+                    }
+                }
+                lines.add(line); // Add the current line to be kept in the file
             }
         } catch (IOException e) {
-            // Handle possible IOException by printing the stack trace
             e.printStackTrace();
             return null;
         }
 
-        // Return the removed department
+        if (!found) {
+            System.out.println("Department not found.");
+            return null;
+        }
+
+        // Rewrite the file without the deleted department
+        try (PrintWriter out = new PrintWriter(new FileWriter(path))) {
+            for (String line : lines) {
+                out.println(line); // Write each line back to the file, excluding the removed department
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        System.out.println("Department has been successfully deleted.");
         return departmentToRemove;
     }
 
