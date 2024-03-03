@@ -180,31 +180,31 @@ public class FileDAO implements IDAO, Menu, FileHandlerInterface{
     @Override
     public Employee updateEmployee(Object id) {
         if (!(id instanceof Integer)) {
-            System.out.println("ID no válido");
+            System.out.println("Invalid ID");
             return null;
         }
 
         int empId = (Integer) id;
         Employee employee = findEmployeeById(empId);
         if (employee == null) {
-            System.out.println("Empleado no encontrado.");
+            System.out.println("Employee not found.");
             return null;
         }
 
-        System.out.println("Actualizar empleado con ID: " + empId);
-        System.out.print("Apellido (actual: " + employee.getName() + "): ");
+        System.out.println("Updating employee with ID: " + empId);
+        System.out.print("Last name (current: " + employee.getName() + "): ");
         String surname = scanner.nextLine();
-        if (surname.isEmpty()) throw new IllegalArgumentException("El apellido no puede estar vacío");
+        if (surname.isEmpty()) throw new IllegalArgumentException("The last name cannot be empty");
 
-        System.out.print("Trabajo (actual: " + employee.getPosition() + "): ");
+        System.out.print("Job (current: " + employee.getPosition() + "): ");
         String job = scanner.nextLine();
-        if (job.isEmpty()) throw new IllegalArgumentException("El trabajo no puede estar vacío");
+        if (job.isEmpty()) throw new IllegalArgumentException("The job cannot be empty");
 
-        System.out.print("ID del Departamento (actual: " + employee.getDepno() + "): ");
+        System.out.print("Department ID (current: " + employee.getDepno() + "): ");
         String departmentId = scanner.nextLine();
-        if (departmentId.isEmpty()) throw new IllegalArgumentException("El ID del departamento no puede estar vacío");
+        if (departmentId.isEmpty()) throw new IllegalArgumentException("The department ID cannot be empty");
 
-        // Update the used object with the new values
+        // Update the object with new values
         employee.setName(surname);
         employee.setPosition(job);
         try {
@@ -219,9 +219,9 @@ public class FileDAO implements IDAO, Menu, FileHandlerInterface{
             }
 
             Files.write(Paths.get(path), fileContent, StandardCharsets.UTF_8);
-            System.out.println("El empleado ha sido actualizado correctamente en el archivo.");
+            System.out.println("The employee was successfully updated in the file.");
         } catch (IOException e) {
-            System.err.println("Ocurrió un error al escribir en el archivo: " + e.getMessage());
+            System.err.println("An error occurred while writing to the file: " + e.getMessage());
             return null;
         }
 
